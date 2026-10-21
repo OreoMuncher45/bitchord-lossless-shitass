@@ -12,15 +12,15 @@ When adding a custom source in **BitChord > Settings > Sources**, you **MUST** u
 
 - **Direct Raw URL (Recommended):**
   ```text
-  https://raw.githubusercontent.com/OreoMuncher45/bitchord-streaming-modules/main/index.json
+  https://raw.githubusercontent.com/OreoMuncher45/bitchord-lossless-shitass/main/index.json
   ```
 - **Alternative (manifest.json format):**
   ```text
-  https://raw.githubusercontent.com/OreoMuncher45/bitchord-streaming-modules/main/manifest.json
+  https://raw.githubusercontent.com/OreoMuncher45/bitchord-lossless-shitass/main/manifest.json
   ```
 - **CDN Mirror (jsDelivr):**
   ```text
-  https://cdn.jsdelivr.net/gh/OreoMuncher45/bitchord-streaming-modules@main/index.json
+  https://cdn.jsdelivr.net/gh/OreoMuncher45/bitchord-lossless-shitass@main/index.json
   ```
 
 ---
