@@ -1,7 +1,5 @@
-# BitChord Streaming Modules
-
-Credentialless Tidal and Qobuz streaming modules for [BitChord](https://github.com/kushagrasinghx/BitChord) (`v1.5.2` and newer).
-
+## THIS ADDON IS NO LONGER MAINTAINED, HAS BEEN MOVED TO:
+https://bitchordnext.shehriyar.ink
 ---
 
 ## ⚠️ Important: How to Add in BitChord
