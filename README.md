@@ -1,4 +1,4 @@
-## THIS ADDON IS NO LONGER MAINTAINED, HAS BEEN MOVED TO:
+## THIS ADDON IS NO LONGER MAINTAINED, HAS BEEN MOVED TO A NEW FORK OF BITCHORD:
 ---
 https://bitchordnext.shehriyar.ink
 https://github.com/OreoMuncher45/BitChordNext
