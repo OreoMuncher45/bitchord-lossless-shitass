@@ -1,5 +1,5 @@
 ## THIS ADDON IS NO LONGER MAINTAINED, HAS BEEN MOVED TO:
-
+---
 https://bitchordnext.shehriyar.ink
 https://github.com/OreoMuncher45/BitChordNext
 ---
