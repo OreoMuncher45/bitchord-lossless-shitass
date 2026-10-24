@@ -19,7 +19,7 @@ const LINK = 'https://auris.shehriyar.ink';
 const KEY = process.env.AURIS_KEY || '';
 
 const MODULES = [
-  ['modules/ax1.js', 'Auris Addon', '3.0.0'],
+  ['modules/ax4.js', 'Auris Addon', '3.0.1'],
   ['modules/ax2.js', 'Auris Hi-Res Lossless Addon', '2.0.0'],
   ['modules/ax3.js', 'Internet Archive FLAC (archive.org)', '2.0.0'],
 ];

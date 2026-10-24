@@ -12,12 +12,13 @@ ROOT = pathlib.Path(__file__).parent
 LOCK_TEXT = "This addon is only compatible with Auris"
 LOCK_LINK = "https://auris.shehriyar.ink"
 LOCKED = {
-    "ax-1": ("Auris Addon", "3.0.0", "modules/ax1.js"),
+    "ax-4": ("Auris Addon", "3.0.1", "modules/ax4.js"),
     "ax-2": ("Auris Hi-Res Lossless Addon", "2.0.0", "modules/ax2.js"),
     "ax-3": ("Internet Archive FLAC (archive.org)", "2.0.0", "modules/ax3.js"),
 }
 RETIRED = [
     "modules/bitchord-tidal-flac.js",
+    "modules/ax1.js",
     "modules/auris-hi-res-lossless.js",
     "modules/archive-flac.js",
     "modules/monochrome-tidal.js",

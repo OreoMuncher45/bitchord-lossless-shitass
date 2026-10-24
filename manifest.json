@@ -1,7 +1,7 @@
 {
   "id": "bitchord-streaming-modules",
   "name": "Auris Lossless Addons",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Lossless streaming modules for Auris. Any other host is refused with: \"This addon is only compatible with Auris. Find it on GitHub or at https://auris.shehriyar.ink\"",
   "author": "Auris",
   "homepage": "https://auris.shehriyar.ink",
@@ -14,10 +14,10 @@
   ],
   "category:music": [
     {
-      "id": "ax-1",
+      "id": "ax-4",
       "name": "Auris Addon",
       "author": "Auris",
-      "version": "3.0.0",
+      "version": "3.0.1",
       "code": 4,
       "type": "MODULE",
       "description": "Fast lossless streaming. Auris only.",
@@ -26,7 +26,7 @@
         "LOSSLESS",
         "FLAC"
       ],
-      "download": "modules/ax1.js",
+      "download": "modules/ax4.js",
       "trusted": false,
       "featured": true,
       "lastUpdated": "2026-10-24"
