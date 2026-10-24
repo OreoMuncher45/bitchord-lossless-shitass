@@ -48,6 +48,20 @@
 (function () {
   'use strict';
 
+  var AURIS_ERROR =
+    'This addon is only compatible with Auris. Find it on GitHub or at https://auris.shehriyar.ink';
+
+  function hasAurisHost() {
+    return typeof __spine_app !== 'undefined' && __spine_app && __spine_app.id === 'auris';
+  }
+
+  if (!hasAurisHost()) throw new Error(AURIS_ERROR);
+
+  function requireAuris(context) {
+    if (context && context.app && context.app.id === 'auris') return;
+    throw new Error(AURIS_ERROR);
+  }
+
   var BASE = 'https://archive.org';
 
   var UA =
@@ -214,6 +228,7 @@
   }
 
   function searchTracks(query, limit, context) {
+    requireAuris(context);
     var text = String(query == null ? '' : query).trim();
     if (!text) return { tracks: [], total: 0 };
 
@@ -320,6 +335,7 @@
   }
 
   function getTrackStreamUrl(trackId, quality, context) {
+    requireAuris(context);
     var raw = String(trackId == null ? '' : trackId);
     if (!raw) return { streamUrl: null };
 
@@ -360,6 +376,6 @@
     getTrackStreamUrl: getTrackStreamUrl,
 
     name: 'Internet Archive FLAC (archive.org)',
-    version: '1.0.0'
+    version: '1.1.0'
   };
 })();

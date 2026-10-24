@@ -1,82 +1,71 @@
-## THIS ADDON IS NO LONGER MAINTAINED, HAS BEEN MOVED TO A NEW FORK OF BITCHORD:
----
-https://bitchordnext.shehriyar.ink
-https://github.com/OreoMuncher45/BitChordNext
----
+# Auris Lossless Addons
 
-## ⚠️ Important: How to Add in BitChord
+Credentialless lossless modules for the **Auris** music player.
 
-When adding a custom source in **BitChord > Settings > Sources**, you **MUST** use a **raw JSON URL**.
+> **This addon is only compatible with Auris.**
+> Any other module host is refused at load time with:
+> `This addon is only compatible with Auris. Find it on GitHub or at https://auris.shehriyar.ink`
 
-### ✅ Working URLs (Copy one of these into BitChord):
-
-- **Direct Raw URL (Recommended):**
-  ```text
-  https://raw.githubusercontent.com/OreoMuncher45/bitchord-lossless-shitass/main/index.json
-  ```
-- **Alternative (manifest.json format):**
-  ```text
-  https://raw.githubusercontent.com/OreoMuncher45/bitchord-lossless-shitass/main/manifest.json
-  ```
-- **CDN Mirror (jsDelivr):**
-  ```text
-  https://cdn.jsdelivr.net/gh/OreoMuncher45/bitchord-lossless-shitass@main/index.json
-  ```
+Auris: [auris.shehriyar.ink](https://auris.shehriyar.ink) · [GitHub](https://github.com/OreoMuncher45/BitChordNext)
 
 ---
 
-### ❌ Why `github.com` URLs cause "Unrecognised JSON — it holds meta, payload"
+## Install in Auris
 
-If you paste:
-- `https://github.com/OreoMuncher45/bitchord-streaming-modules`
-- `https://github.com/OreoMuncher45/bitchord-streaming-modules/blob/main/index.json`
-- `https://github.com/OreoMuncher45/bitchord-streaming-modules/blob/main/manifest.json`
+Add a source and paste one of these raw JSON URLs:
 
-BitChord sends an HTTP request with `Accept: application/json`. GitHub responds with its internal web-app React SPA state instead of raw file contents:
-```json
-{
-  "meta": { ... },
-  "payload": { ... }
-}
+```text
+https://raw.githubusercontent.com/OreoMuncher45/bitchord-lossless-shitass/main/index.json
+https://raw.githubusercontent.com/OreoMuncher45/bitchord-lossless-shitass/main/manifest.json
+https://cdn.jsdelivr.net/gh/OreoMuncher45/bitchord-lossless-shitass@main/index.json
 ```
-BitChord inspects the keys (`meta`, `payload`) and rejects it with:
-> `Unrecognised JSON — it holds meta, payload` (from `SourceFormats.kt:193`)
 
-Using `raw.githubusercontent.com` returns the actual JSON payload with `"category:music"` and manifest descriptors, allowing BitChord to correctly identify and load the modules.
+Auris detects the module index and asks for it like any other source. Use `raw.githubusercontent.com` or jsDelivr, not a `github.com/.../blob/...` page — that returns GitHub's web-app JSON and is rejected as unrecognised.
 
 ---
 
-## How BitChord Handles Playlists
+## Why it is locked
 
-BitChord does not browse external Tidal/Qobuz playlists natively. Instead, BitChord integrates streaming modules via **track substitution**:
-1. When you play an album, playlist, radio station, or search result from YouTube Music, BitChord's `SourceResolver.substituteForYouTube()` checks your active sources.
-2. If your custom module is ranked above YouTube (default rank 0 vs YouTube rank 3), BitChord calls `module.exports.searchTracks()` for the track's artist and title.
-3. `TrackMatcher` validates whether the candidate is a genuine match.
-4. BitChord calls `module.exports.getTrackStreamUrl()` to retrieve the lossless stream.
-5. If the module returns a valid stream, BitChord plays the Tidal/Qobuz stream bit-exact; if unavailable or missing, it seamlessly falls back to YouTube Music.
+These modules carry the same playback logic as Auris's built-in Tidal and Hi-Res sources, which is tuned to Auris's module runtime: synchronous sandbox `fetch`, response headers exposed for file measurement, and an app identity object passed to every module call.
+
+The lock is deliberately narrow rather than security theatre:
+
+- At load, a module checks the host-provided `__spine_app` identity and throws if it is missing or not Auris.
+- On every search and stream call, the module also checks the `app` object in its `context` argument.
+- The failure message is the one above, with the `auris.shehriyar.ink` link, so someone who tries the addon elsewhere is told where to find Auris rather than left with a silent empty search.
+
+## Included modules
+
+### 1. Auris Addon (`bitchord-tidal-flac`) — 2.0.0
+
+Genuine lossless Tidal FLAC, credentialless.
+
+- **Parallel instance probing.** The bundled instance pool is hashed at once and the first healthy instance wins, instead of walking the pool one host at a time.
+- **Per-instance protocol memo.** Each instance is remembered for the protocol it actually speaks: the tracks protocol (`/search/tracks`, direct `/track/{id}` bytes) is preferred, hifi-api v2 (`/search/?s=`, base64 manifests) is the fallback.
+- **Measured, not claimed.** A 4-byte `Range` request proves the file starts with `fLaC`; when it can, it also measures size over duration and refuses a rendition that is not actually lossless.
+- **Fast failure.** Health checks are cached for 30 minutes, and a dead instance is dropped from the walk rather than retried on every track.
+
+### 2. Auris Hi-Res Lossless Addon (`auris-hi-res-lossless`) — 1.0.0
+
+Direct FLAC files from an open catalogue, with no converter and no waiting.
+
+- **Title and modifier matching.** Search rows are filtered against the asked-for title and qualifiers, so a live take is not handed over for a studio request.
+- **Every stream measured.** A 1-byte range request proves the `fLaC` signature, and file size over track duration yields the average bitrate. Anything under 300 kbps is refused rather than played as "lossless".
+- **Retries only on 5xx.** Timeouts fail fast; transient server errors retry briefly.
+
+### 3. Internet Archive FLAC (`archive-flac`) — 1.1.0
+
+Live tapes and bootlegs that a studio catalogue will never hold.
+
+- **Credentialless.** `advancedsearch.php` + parallel `metadata/{id}` fan-out + `/download/{id}/{file}`.
+- **Measured.** The same 4-byte `fLaC` check before any rendition is claimed.
+- **Complements the studio modules.** It wins when Tidal is slow or the track only exists as a live recording, and loses cleanly when it has nothing.
 
 ---
 
-## Included Modules
+## Contract verification
 
-### 1. Tidal FLAC via tracks.monochrome.st (`bitchord-tidal-flac`)
-- **Credentialless:** Public read-only Tidal index. No account, no token.
-- **Stream:** Direct `/track/{id}?quality=LOSSLESS` proxy URL, claimed only after a 4-byte `fLaC` Range-probe check.
-- **Timeouts:** 6s search / 6s probe, retried only on fast 5xx — timeouts fail fast so one slow link never becomes a 30s upgrade.
-- **Holds:** Studio masters, including niche shoegaze (Pure Hex studio, Porch Light band, Whirr, Glixen, Fleshwater — verified Oct 2026).
-
-### 2. Internet Archive FLAC (`archive-flac`)
-- **Credentialless:** Public `advancedsearch.php` + `metadata/{id}` + `/download/{id}/{file}`. No account, no token.
-- **Stream:** Direct `archive.org/download` URL, same 4-byte `fLaC` check. Range probes answer in ~0.4s vs ~3.8s for the Tidal proxy.
-- **Search:** One query + parallel fan-out over 4 items (~1.5-4.7s measured). Free-text relevance ranking — fielded queries go to zero on "Artist Title" flat strings.
-- **Holds:** Live tapes and bootlegs Tidal never will (Pure Hex 2022-2023 SF lives incl. "02 Still Dark", Slowdive 1993-2023 lives). Studio Porch Light is a Tidal-only miss here — by design the two modules race and cover each other.
-- **App fit:** BitChord races every module in the index at once (`ModuleSource` 8s live / 25s patient budgets, round-robin interleave). Two hosts failing differently beats one host retried: when Tidal hangs past 10s, Archive wins the live budget, and vice versa.
-
----
-
-## Contract Verification
-
-Both `index.json` and `manifest.json` conform to the BitChord QuickJS and Addon specifications:
+`index.json` and `manifest.json` are checked against the module contract, including the Auris-only gate and the actual exported functions:
 
 ```bash
 python3 test_contract.py

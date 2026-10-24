@@ -1,9 +1,10 @@
 {
   "id": "bitchord-streaming-modules",
-  "name": "BitChord Streaming Modules",
-  "version": "0.5.0",
-  "description": "Credentialless FLAC streaming modules for BitChord. No account or token.",
-  "author": "community",
+  "name": "Auris Lossless Addons",
+  "version": "0.6.0",
+  "description": "Auris-only lossless modules: the fast Tidal path, measured Hi-Res direct FLAC, and Internet Archive FLAC. Other apps receive: \"This addon is only compatible with Auris. Find it on GitHub or at https://auris.shehriyar.ink\"",
+  "author": "Auris",
+  "homepage": "https://auris.shehriyar.ink",
   "resources": [
     "search",
     "stream"
@@ -14,13 +15,14 @@
   "category:music": [
     {
       "id": "bitchord-tidal-flac",
-      "name": "Tidal FLAC (tracks.monochrome.st)",
-      "author": "community",
-      "version": "0.4.0",
+      "name": "Auris Addon",
+      "author": "Auris",
+      "version": "2.0.0",
       "code": 4,
       "type": "MODULE",
-      "description": "Credentialless Tidal FLAC search and playback via tracks.monochrome.st, with per-host failover, a 4-byte fLaC signature check before any rendition is claimed, and retry on the CDN 520s this upstream returns intermittently. Replaces monochrome-tidal, whose eight hosts are all dead or auth-broken.",
+      "description": "Auris-only fast Tidal FLAC. Parallel instance probing, remembers the protocol each instance speaks, prefers the tracks protocol's direct /track/{id} bytes, falls back to hifi-api v2 manifests, and refuses a measured transcode. Locked to Auris: any other host is refused with a link to https://auris.shehriyar.ink.",
       "tags": [
+        "AURIS ONLY",
         "TIDAL",
         "LOSSLESS",
         "FLAC",
@@ -30,17 +32,40 @@
       "download": "modules/bitchord-tidal-flac.js",
       "trusted": false,
       "featured": true,
-      "lastUpdated": "2026-10-02"
+      "lastUpdated": "2026-10-24"
+    },
+    {
+      "id": "auris-hi-res-lossless",
+      "name": "Auris Hi-Res Lossless Addon",
+      "author": "Auris",
+      "version": "1.0.0",
+      "code": 4,
+      "type": "MODULE",
+      "description": "Auris-only direct FLAC from the open catalogue. Search rows are title/modifier matched, every stream is opened with a 1-byte range request to prove the fLaC signature, and size over duration measures the bitrate so a below-lossless file is refused. Locked to Auris: any other host is refused with a link to https://auris.shehriyar.ink.",
+      "tags": [
+        "AURIS ONLY",
+        "LOSSLESS",
+        "HI-RES",
+        "FLAC",
+        "DIRECT",
+        "NO LOGIN",
+        "NO ACCOUNT"
+      ],
+      "download": "modules/auris-hi-res-lossless.js",
+      "trusted": false,
+      "featured": true,
+      "lastUpdated": "2026-10-24"
     },
     {
       "id": "archive-flac",
       "name": "Internet Archive FLAC (archive.org)",
-      "author": "community",
-      "version": "1.0.0",
+      "author": "Auris",
+      "version": "1.1.0",
       "code": 4,
       "type": "MODULE",
-      "description": "Credentialless live/bootleg FLAC via archive.org advancedsearch + metadata fan-out, with 4-byte fLaC check. Races Tidal so one slow host never defines the upgrade; holds tapers Tidal misses (Pure Hex lives, niche shoegaze).",
+      "description": "Auris-only live/bootleg FLAC via archive.org advancedsearch + metadata fan-out, with a 4-byte fLaC check. Holds tapers Tidal misses. Locked to Auris: any other host is refused with a link to https://auris.shehriyar.ink.",
       "tags": [
+        "AURIS ONLY",
         "ARCHIVE",
         "LOSSLESS",
         "FLAC",
@@ -51,7 +76,7 @@
       "download": "modules/archive-flac.js",
       "trusted": false,
       "featured": true,
-      "lastUpdated": "2026-10-05"
+      "lastUpdated": "2026-10-24"
     }
   ]
 }
