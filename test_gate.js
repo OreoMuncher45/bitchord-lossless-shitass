@@ -19,8 +19,8 @@ const LINK = 'https://auris.shehriyar.ink';
 const KEY = process.env.AURIS_KEY || '';
 
 const MODULES = [
-  ['modules/ax4.js', 'Auris Addon', '3.0.1'],
-  ['modules/ax2.js', 'Auris Hi-Res Lossless Addon', '2.0.0'],
+  ['modules/ax4.js', 'Auris Addon', '3.0.2'],
+  ['modules/ax2.js', 'Auris Hi-Res Lossless Addon', '2.0.1'],
   ['modules/ax3.js', 'Internet Archive FLAC (archive.org)', '2.0.0'],
 ];
 
@@ -36,10 +36,11 @@ function ok(cond, label) {
   }
 }
 
-function load(file, spine) {
+function load(file, spine, extra) {
   const code = fs.readFileSync(path.join(ROOT, file), 'utf8');
   const module = { exports: {} };
-  const sandbox = { module, exports: module.exports, console };
+  const sandbox = { module, exports: module.exports, console, setTimeout, Promise };
+  Object.assign(sandbox, extra || {});
   sandbox.globalThis = sandbox;
   if (spine !== undefined) sandbox.__spine_app = spine;
   vm.createContext(sandbox);
@@ -88,6 +89,28 @@ for (const [file, name, version] of MODULES) {
     throwsLock(() => exports.searchTracks('x', 1, { app: { id: 'auris', key: 'wrong' } })),
     'refuses a call with a forged context',
   );
+
+  // A direct stream row must resolve to a URL with no network request: the
+  // sandbox bridge reads whole bodies, so any probe on the file itself is a
+  // full download on the play path.
+  if (file === 'modules/ax4.js') {
+    let fetches = 0;
+    const counted = load(
+      file,
+      { id: 'auris', key: KEY, name: 'Auris' },
+      { fetch: () => { fetches++; return Promise.reject(new Error('offline')); } },
+    );
+    const row =
+      'https://tracks.monochrome.st|t|200|155142501534011392';
+    const answer = counted.getTrackStreamUrl(row, 'LOSSLESS', {
+      app: { id: 'auris', key: KEY },
+    });
+    ok(
+      !!answer && answer.streamUrl === 'https://tracks.monochrome.st/track/155142501534011392',
+      'direct stream resolves to the file URL',
+    );
+    ok(fetches === 0, 'direct stream resolution performs no fetch');
+  }
 }
 
 console.log(`\n${assertions - failures}/${assertions} assertions passed`);

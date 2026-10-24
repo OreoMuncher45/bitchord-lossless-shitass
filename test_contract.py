@@ -18,8 +18,8 @@ LOCK_LINK = "https://auris.shehriyar.ink"
 GATED_INDEX = "https://auris.shehriyar.ink/this-addon-is-only-compatible-with-auris-find-it-at-auris.shehriyar.ink"
 
 MODULES = {
-    "modules/ax4.js": ("Auris Addon", "3.0.1"),
-    "modules/ax2.js": ("Auris Hi-Res Lossless Addon", "2.0.0"),
+    "modules/ax4.js": ("Auris Addon", "3.0.2"),
+    "modules/ax2.js": ("Auris Hi-Res Lossless Addon", "2.0.1"),
     "modules/ax3.js": ("Internet Archive FLAC (archive.org)", "2.0.0"),
 }
 RETIRED = [
