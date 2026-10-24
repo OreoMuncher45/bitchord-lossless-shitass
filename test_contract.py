@@ -1,6 +1,10 @@
 """
-Validates that the shipped addon index, manifest, and obfuscated modules stay
-consistent and do not leak the lock or the host key in readable form.
+Validates the shipped addon.
+
+The public index is intentionally a refusal stub: the real index is served by
+the Auris-gated endpoint, which is the only place a foreign host can be
+stopped before any module code runs. This test also checks that every shipped
+module stays opaque and that retired readable sources are gone.
 
 Run:  python3 test_contract.py
 """
@@ -11,10 +15,12 @@ import re
 ROOT = pathlib.Path(__file__).parent
 LOCK_TEXT = "This addon is only compatible with Auris"
 LOCK_LINK = "https://auris.shehriyar.ink"
-LOCKED = {
-    "ax-4": ("Auris Addon", "3.0.1", "modules/ax4.js"),
-    "ax-2": ("Auris Hi-Res Lossless Addon", "2.0.0", "modules/ax2.js"),
-    "ax-3": ("Internet Archive FLAC (archive.org)", "2.0.0", "modules/ax3.js"),
+GATED_INDEX = "https://auris.shehriyar.ink/this-addon-is-only-compatible-with-auris-find-it-at-auris.shehriyar.ink"
+
+MODULES = {
+    "modules/ax4.js": ("Auris Addon", "3.0.1"),
+    "modules/ax2.js": ("Auris Hi-Res Lossless Addon", "2.0.0"),
+    "modules/ax3.js": ("Internet Archive FLAC (archive.org)", "2.0.0"),
 }
 RETIRED = [
     "modules/bitchord-tidal-flac.js",
@@ -32,83 +38,50 @@ for filename in ["index.json", "manifest.json"]:
     data = json.loads(doc_path.read_text())
     docs[filename] = data
 
-    assert "category:music" in data, f"{filename} must contain 'category:music'"
-    modules = data["category:music"]
-    assert isinstance(modules, list), f"'category:music' in {filename} must be a list"
-    assert len(modules) == len(LOCKED), \
-        f"Expected {len(LOCKED)} modules in {filename}, got {len(modules)}"
-
-    assert data.get("id"), f"{filename} missing 'id'"
-    assert data.get("name"), f"{filename} missing 'name'"
-    assert data.get("version"), f"{filename} missing 'version'"
-    assert "resources" in data, f"{filename} missing 'resources'"
-    assert "search" in data["resources"] and "stream" in data["resources"], \
-        f"{filename} must advertise search and stream"
-
-    # The lock is stated where a host reads it before running any code.
     assert LOCK_TEXT in data.get("description", ""), \
         f"{filename} description must carry the lock text"
     assert LOCK_LINK in data.get("description", ""), \
         f"{filename} description must carry the Auris link"
+    assert data.get("install") == GATED_INDEX, \
+        f"{filename} must point installers at the gated endpoint"
 
-    listed = {module.get("id"): module for module in modules}
-    assert set(listed) == set(LOCKED), \
-        f"{filename} module ids differ: {sorted(listed)}"
+    # The public file must not list a module. A host that fetches it can only
+    # report that the index has nothing, which means the source cannot be
+    # added without the Auris header.
+    assert not data.get("category:music"), \
+        f"{filename} must not list modules publicly"
+    assert data.get("error"), f"{filename} must explain the refusal"
 
-    for module_id, (name, version, download) in LOCKED.items():
-        module = listed[module_id]
-        assert module.get("name") == name, \
-            f"{module_id}: name must be {name!r}, got {module.get('name')!r}"
-        assert module.get("version") == version, \
-            f"{module_id}: version must be {version}, got {module.get('version')}"
-        assert module.get("download") == download, \
-            f"{module_id}: download must be {download!r}, got {module.get('download')!r}"
-        assert "AURIS ONLY" in module.get("tags", []), \
-            f"{module_id}: missing 'AURIS ONLY' tag"
-        assert isinstance(module.get("code", 0), int), \
-            f"code must be an integer: {module_id}"
+for download, (name, version) in MODULES.items():
+    source_path = ROOT / download
+    assert source_path.exists(), f"JS source not found: {source_path}"
+    source = source_path.read_text()
+    assert len(source) > 10_000, f"{download}: shipped file is suspiciously small"
 
-        source_path = ROOT / download
-        assert source_path.exists(), f"JS source not found: {source_path}"
-        source = source_path.read_text()
-        assert len(source) > 10_000, f"{module_id}: shipped file is suspiciously small"
+    for leak in (
+        LOCK_TEXT,
+        LOCK_LINK,
+        "__spine_app",
+        "searchTracks",
+        "getTrackStreamUrl",
+        "module.exports",
+        "requireAuris",
+    ):
+        assert leak not in source, f"{download}: leaked {leak!r} in shipped file"
 
-        # The served file is compiled. None of the readable gate, exports, or
-        # endpoints may survive as plain text.
-        for leak in (
-            LOCK_TEXT,
-            LOCK_LINK,
-            "__spine_app",
-            "searchTracks",
-            "getTrackStreamUrl",
-            "module.exports",
-            "requireAuris",
-        ):
-            assert leak not in source, f"{module_id}: leaked {leak!r} in shipped file"
+    assert re.search(r"function [A-Za-z0-9_]+\(", source), \
+        f"{download}: no obfuscated function table found"
+    assert "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=" in source, \
+        f"{download}: expected encoded string table"
 
-        # Obfuscation must actually be present: the decoder takes a numeric
-        # offset and the string table is encoded.
-        assert re.search(r"function [A-Za-z0-9_]+\(", source), \
-            f"{module_id}: no obfuscated function table found"
-        assert "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=" in source, \
-            f"{module_id}: expected encoded string table"
+    print(f"  ✓ {download} ({name} {version}) shipped opaque")
 
-        print(f"  ✓ [{filename}] {module_id} ({module['version']}) shipped opaque")
-
-# Retired readable sources must not remain reachable by an old cached index.
 for retired in RETIRED:
     assert not (ROOT / retired).exists(), f"retired source still published: {retired}"
 
-# The two documents must describe the same addon.
 assert docs["index.json"]["version"] == docs["manifest.json"]["version"], \
     "index.json and manifest.json versions differ"
-for module_id, (_, version, download) in LOCKED.items():
-    a = next(m for m in docs["index.json"]["category:music"] if m["id"] == module_id)
-    b = next(m for m in docs["manifest.json"]["category:music"] if m["id"] == module_id)
-    assert a["download"] == b["download"] == download, \
-        f"{module_id}: download paths differ"
-    assert a["version"] == b["version"] == version, \
-        f"{module_id}: index/manifest versions differ"
 
-print("\nAuris module contract & manifest: valid in all files.")
-print(f"Opaque modules; lock ({LOCK_LINK}) enforced at runtime by test_gate.js.")
+print("\nPublic index: refusal stub only.")
+print(f"Real index: {GATED_INDEX} (Auris header required).")
+print("Opaque modules verified; runtime gate is covered by test_gate.js.")

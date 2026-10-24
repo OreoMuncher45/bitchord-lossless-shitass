@@ -3,7 +3,7 @@
 Lossless streaming modules for the **Auris** music player.
 
 > **This addon is only compatible with Auris.**
-> Any other module host is refused at load time with:
+> Any other module host is refused before it can add the source, and again at module load, with:
 > `This addon is only compatible with Auris. Find it on GitHub or at https://auris.shehriyar.ink`
 
 Auris: [auris.shehriyar.ink](https://auris.shehriyar.ink) · [GitHub](https://github.com/OreoMuncher45/BitChordNext)
@@ -12,15 +12,15 @@ Auris: [auris.shehriyar.ink](https://auris.shehriyar.ink) · [GitHub](https://gi
 
 ## Install in Auris
 
-Add a source and paste one of these raw JSON URLs:
+Add this source URL in Auris:
 
 ```text
-https://raw.githubusercontent.com/OreoMuncher45/bitchord-lossless-shitass/main/index.json
-https://raw.githubusercontent.com/OreoMuncher45/bitchord-lossless-shitass/main/manifest.json
-https://cdn.jsdelivr.net/gh/OreoMuncher45/bitchord-lossless-shitass@main/index.json
+https://auris.shehriyar.ink/this-addon-is-only-compatible-with-auris-find-it-at-auris.shehriyar.ink
 ```
 
-Use `raw.githubusercontent.com` or jsDelivr, not a `github.com/.../blob/...` page — that returns GitHub's web-app JSON and is rejected as unrecognised.
+Auris sends its host identity with the request. Any other app gets HTTP 403 and cannot add the source. The raw GitHub `index.json` is intentionally a refusal stub, not an install URL.
+
+This requires an Auris build that sends the host identity (the same builds that carry the in-sandbox key check).
 
 ---
 
@@ -32,7 +32,10 @@ Use `raw.githubusercontent.com` or jsDelivr, not a `github.com/.../blob/...` pag
 
 ## Lock
 
-The modules check the host identity at load and again on every search and stream call. A host that does not present the Auris identity is refused with the message above, which points to where Auris can be found.
+Two layers:
+
+1. The index endpoint returns 403 to a host that does not present the Auris identity, so a foreign app cannot add the source at all.
+2. If a module file is copied anyway, it checks the host identity at load and on every search and stream call, and refuses with the message above.
 
 The shipped JavaScript is compiled, not the readable source. The source is kept private.
 
@@ -41,6 +44,6 @@ The shipped JavaScript is compiled, not the readable source. The source is kept 
 ## Verification
 
 ```bash
-python3 test_contract.py   # index/manifest contract and shipped-file checks
-node test_gate.js          # runtime gate and export checks
+python3 test_contract.py   # public stub and shipped-file checks
+AURIS_KEY=... node test_gate.js   # runtime gate and export checks
 ```

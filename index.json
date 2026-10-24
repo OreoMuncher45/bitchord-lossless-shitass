@@ -2,73 +2,11 @@
   "id": "bitchord-streaming-modules",
   "name": "Auris Lossless Addons",
   "version": "0.7.1",
-  "description": "Lossless streaming modules for Auris. Any other host is refused with: \"This addon is only compatible with Auris. Find it on GitHub or at https://auris.shehriyar.ink\"",
+  "description": "This addon is only compatible with Auris. Find it on GitHub or at https://auris.shehriyar.ink",
   "author": "Auris",
   "homepage": "https://auris.shehriyar.ink",
-  "resources": [
-    "search",
-    "stream"
-  ],
-  "types": [
-    "music"
-  ],
-  "category:music": [
-    {
-      "id": "ax-4",
-      "name": "Auris Addon",
-      "author": "Auris",
-      "version": "3.0.1",
-      "code": 4,
-      "type": "MODULE",
-      "description": "Fast lossless streaming. Auris only.",
-      "tags": [
-        "AURIS ONLY",
-        "LOSSLESS",
-        "FLAC"
-      ],
-      "download": "modules/ax4.js",
-      "trusted": false,
-      "featured": true,
-      "lastUpdated": "2026-10-24"
-    },
-    {
-      "id": "ax-2",
-      "name": "Auris Hi-Res Lossless Addon",
-      "author": "Auris",
-      "version": "2.0.0",
-      "code": 4,
-      "type": "MODULE",
-      "description": "Hi-Res lossless streaming. Auris only.",
-      "tags": [
-        "AURIS ONLY",
-        "LOSSLESS",
-        "HI-RES",
-        "FLAC"
-      ],
-      "download": "modules/ax2.js",
-      "trusted": false,
-      "featured": true,
-      "lastUpdated": "2026-10-24"
-    },
-    {
-      "id": "ax-3",
-      "name": "Internet Archive FLAC (archive.org)",
-      "author": "Auris",
-      "version": "2.0.0",
-      "code": 4,
-      "type": "MODULE",
-      "description": "Live and bootleg lossless. Auris only.",
-      "tags": [
-        "AURIS ONLY",
-        "ARCHIVE",
-        "LOSSLESS",
-        "FLAC",
-        "LIVE"
-      ],
-      "download": "modules/ax3.js",
-      "trusted": false,
-      "featured": true,
-      "lastUpdated": "2026-10-24"
-    }
-  ]
+  "resources": [],
+  "types": [],
+  "error": "This addon is only compatible with Auris. Add it from inside Auris; the public index is intentionally disabled.",
+  "install": "https://auris.shehriyar.ink/this-addon-is-only-compatible-with-auris-find-it-at-auris.shehriyar.ink"
 }
